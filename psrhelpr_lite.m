@@ -1,4 +1,4 @@
-function psr = psrhelpr_lite(sig, zffs, fr, threshold)
+function psr = psrhelpr_lite(sig, zffs, fr, threshold, smoothoption)
 M = length(sig);
 N = 30*fr/1000;
 shiftsize = 1*fr/1000;
@@ -40,6 +40,8 @@ for j = 1:iter
     end
 end 
 
+if(smoothoption == 1)
 psr = smooth(psr,floor(1000*1));
+end
 psr = [psr;psr(end)*ones(29,1)];
 end

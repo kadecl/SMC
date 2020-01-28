@@ -29,9 +29,9 @@ summedEvidence = mapping(psr + lme, 0.4);
 M = length(summedEvidence);
 N = 1000;
 T = floor(M/N);
-label = zeros(M,1);
+label = zeros(T,1);
 for t = 1:T
-    label((t-1)*N+1:t*N) = mean( summedEvidence( (t-1)*N+1:t*N ) ) - 0.5 > 0;
+    label(t) = mean( summedEvidence( (t-1)*N+1:t*N ) ) - 0.5 > 0;
 end
 figure
 subplot(4,1,1)

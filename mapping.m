@@ -25,7 +25,7 @@ index_dec = find(d_spmu_vol == -1);
 %“Á’¥—Ê‚É‚æ‚é‹æ•Ê
 num_segment = length(index_inc);
 for i=1:num_segment
-    s = sample( (index_inc(i)-1)*8+1 : index_dec(i)*8 );
+    s = sample( (index_inc(i)-1)*fr+1 : index_dec(i)*fr );
     label = predictspmu( s, fr, SVM );
     spmu(index_inc(i):index_dec(i)) = label;
 end

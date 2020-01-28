@@ -1,5 +1,5 @@
 %ロード
-filename = './deta/oobeya/unknown/20190929_spmu3.wav';
+filename = './deta/oobeya/unknown/20190929_spmu2.wav';
 %filename = './dataset/speech_music2.m4a';
 [sample, fr] = audioread( filename );
 
@@ -20,13 +20,13 @@ fr = newfr;
 
 %音量で区別
 [spmu, d_spmu_vol] = discWithEnv(sample);
-index_inc = find(d_spmu_vol == 1);
+index_inc = find(d_spmu_vol == 1);%何秒めにスタートがあるか
 index_dec = find(d_spmu_vol == -1);
 
 %特徴量による区別
 num_segment = length(index_inc);
 for i=1:num_segment
-    s = sample( (index_inc(i)-1)*8+1 : index_dec(i)*8 );
+    s = sample( (index_inc(i)-1)*fr+1 : index_dec(i)*fr );
     label = predictspmu( s, fr, SVM );
     %label = nonLinearMapping(s,fr);
     spmu(index_inc(i):index_dec(i)) = label;
@@ -34,7 +34,7 @@ end
 
 figure
 subplot(2,1,1)
-plot(sample)
+plot( (0:length(sample)-1)/fr, sample)
 subplot(2,1,2)
 plot(spmu)
 

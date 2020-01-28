@@ -1,4 +1,4 @@
-function lme = logMelEnergy2(sig, fr)
+function lme = logMelEnergy2(sig, fr ,smoothoption)
 % 入力信号内でパワーのばらつきがあるとその影響を受けてしまうため
 % フレームごとに正規化を行う改良を行った。
 % これにより入力信号のパワー差に影響を受けず
@@ -26,7 +26,9 @@ for i=1:iter
     subsig = filteredSig( init+1:init+N , :);
     lme(i) = melFilteredLogMelEnergy(subsig);
 end
+if(smoothoption == 1)
 lme = movvar(lme, 1000);
+end
 lme = [lme; lme(end)*ones(29,1)];
 
 % regularization

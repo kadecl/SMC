@@ -16,23 +16,17 @@ for i=1:T
 end
 
 figure
-subplot(4,1,1)
-plot( (0:length(env)-1)/fs, env )
-subplot(4,1,2)
-plot( (0:length(frames)-1)/(fs/N), frames )
+subplot(3,1,1)
+plot( frames )
 threshold = input('enter threshold: ');
 
-spmu_org = threshold-frames >= 0;
-spmu = zeros(M,1);
-for t=1:T
-    spmu( N*(t-1)+1 : N*t ) = spmu_org( t );
-end
+spmu = threshold-frames >= 0;
 spmu(1) = 0; %0n‚Ü‚èA0‚¨‚í‚è‚É“ˆê
 spmu(end) = 0;
 
-subplot(4,1,3)
-plot( (0:length(spmu)-1)/fs, spmu )
+subplot(3,1,2)
+plot( spmu )
 
-subplot(4,1,4)
+subplot(3,1,3)
 d_spmu = conv(spmu, [1,-1], 'same');
-plot( (0:length(spmu)-1)/fs, d_spmu);
+plot( d_spmu);

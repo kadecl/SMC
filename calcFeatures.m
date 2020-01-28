@@ -1,4 +1,4 @@
-function D = calcFeatures(filename, sp_mu)
+function D = calcFeatures(filename, sp_mu, numfeatures)
     [sample, fr] = audioread( filename );
 
     [r,c] = size(sample);
@@ -16,31 +16,52 @@ function D = calcFeatures(filename, sp_mu)
     sample = downsample(sample, Ratio);
     fr = newfr;
 
-    %ê≥ãKâª
-    %sample = sample/max(abs(sample));
-
     M = length( sample );
-    N = floor(30 * fr / 1000);
-    shiftsize = floor(fr * 1 / 1000);
-    iter = floor((M-N) / shiftsize)+30;
-    if(sp_mu == 0)
-        Y = zeros(iter,1);
-    else
-        Y = ones(iter,1);
+    %N = floor(30 * fr / 1000);
+    %shiftsize = floor(fr * 1 / 1000);
+    %iter = floor((M-N) / shiftsize)+30;
+
+    zffs = ZPZDZFFS(sample,fr);
+    T = floor(M/fr);%ì¸Ç¡ÇƒÇ´ÇΩÉTÉìÉvÉãÇÃéûä‘
+    D = zeros(T,7);
+    if(sp_mu == 1)
+        D(:,1) = 1;
     end
     
-    zffs = ZPZDZFFS(sample,fr);
     %% naps of zffs
     % naps = NAPS(zffs, fr);
     %% PSR of HE of LPR
-    psr = psrhelpr_lite(sample,zffs,fr,0.0002);
+    psr = psrhelpr_lite(sample,zffs,fr,0.0002,0);
     %% log mel energy
-    lme = logMelEnergy2(sample,fr);
+    lme = logMelEnergy2(sample,fr,0);
     %% modulation spectrogram
     %mtf = MTF(sample,fr);
     %mtf = smooth(mtf,floor(fr*0.1));
+    %% spectral centroid
+    cent = spectralCentroid(sample,fr);
+    cent = [cent; cent(end)*[1;1]]; 
+    %% spectral flux
+    flux = spectralFlux(sample,fr);
+    flux = [flux; flux(end)*[1;1]];
+    %% spectral rolloff Point
+    rop = spectralRolloffPoint(sample,fr); %100numvalues/sec -2numvalue
+    rop = [rop; rop(end)*[1;1]];
     
-   D = [Y,psr,lme]; 
+    if T ~= floor(length(rop)/100)
+        exit()
+    end
+    
+    %% zero crossing rate
+    zcr = ZCR(sample,fr);
+    
+    for t=1:T
+        D(t,2) = mean(psr( (t-1)*1000+1:t*1000 ));
+        D(t,3) = var( lme( (t-1)*1000+1:t*1000 ));
+        D(t,4) = var( cent( (t-1)*100 +1:t*100 ));
+        D(t,5) = var( flux( (t-1)*100 +1:t*100 ));
+        D(t,6) = var( rop(  (t-1)*100 +1:t*100 ));        
+    end
+    D(:,7) = zcr;
     %% plot 4 seatures
 figure
 % [sample, fr] = audioread( filename );
@@ -54,17 +75,13 @@ figure
 % plot((0:length(naps)-1)/1000, naps)
 % ylabel('NAPS of ZFFS');
 
-subplot(2,1,1)
-plot((0:length(psr)-1)/1000, psr);
-ylabel('PSR of HE of LPR');
-
-subplot(2,1,2)
-plot((0:length(lme)-1)/1000, lme);
-ylabel('log mel energy');
-% 
-% % subplot(5,1,5)
-% % plot((0:length(D(:,4))-1)/1000, D(:,4));
-% % ylabel('Mod Spec');
-% 
-% xlabel('Time (sec)');
+strarray = ["Y","PSR", "lme", "centroid", "flux", "rolloff", "zcr"];
+title(filename);
+for i=1:numfeatures
+    subplot(numfeatures,1,i)
+    plot(D(:,i+1));
+    ylabel(strarray(i+1));
+end
+title(filename);
+xlabel('Time (sec)');
 end
