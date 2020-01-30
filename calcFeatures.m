@@ -1,4 +1,4 @@
-function D = calcFeatures(filename, sp_mu, numfeatures)
+function D = calcFeatures(filename, sp_mu)
     [sample, fr] = audioread( filename );
 
     [r,c] = size(sample);
@@ -17,9 +17,6 @@ function D = calcFeatures(filename, sp_mu, numfeatures)
     fr = newfr;
 
     M = length( sample );
-    %N = floor(30 * fr / 1000);
-    %shiftsize = floor(fr * 1 / 1000);
-    %iter = floor((M-N) / shiftsize)+30;
 
     zffs = ZPZDZFFS(sample,fr);
     T = floor(M/fr);%“ü‚Á‚Ä‚«‚½ƒTƒ“ƒvƒ‹‚ÌŽžŠÔ
@@ -47,41 +44,23 @@ function D = calcFeatures(filename, sp_mu, numfeatures)
     rop = spectralRolloffPoint(sample,fr); %100numvalues/sec -2numvalue
     rop = [rop; rop(end)*[1;1]];
     
-    if T ~= floor(length(rop)/100)
-        exit()
-    end
-    
-    %% zero crossing rate
-    zcr = ZCR(sample,fr);
-    
     for t=1:T
-        D(t,2) = mean(psr( (t-1)*1000+1:t*1000 ));
-        D(t,3) = var( lme( (t-1)*1000+1:t*1000 ));
-        D(t,4) = var( cent( (t-1)*100 +1:t*100 ));
-        D(t,5) = var( flux( (t-1)*100 +1:t*100 ));
-        D(t,6) = var( rop(  (t-1)*100 +1:t*100 ));        
+        D(t,2) = mean( psr((t-1)*1000+1:t*1000 ));
+        D(t,3) = var(  lme((t-1)*1000+1:t*1000 ));
+        D(t,4) = var(  rop( (t-1)*100 +1:t*100 ));
+        D(t,5) = var( cent( (t-1)*100 +1:t*100 ));
+        D(t,6) = var( flux( (t-1)*100 +1:t*100 ));
     end
-    D(:,7) = zcr;
+    D(:,7) = ZCR(sample,fr);
     %% plot 4 seatures
-figure
-% [sample, fr] = audioread( filename );
-% sample = downsample( sample, floor(fr/1000) );
-% subplot(4,1,1)
-% plot((0:length(sample)-1)/fr, sample)
+% figure
+% strarray = ["Y","PSR", "lme", "centroid", "flux", "rolloff", "zcr"];
 % title(filename);
-% ylabel('signal');
-% 
-% subplot(3,1,1)
-% plot((0:length(naps)-1)/1000, naps)
-% ylabel('NAPS of ZFFS');
-
-strarray = ["Y","PSR", "lme", "centroid", "flux", "rolloff", "zcr"];
-title(filename);
-for i=1:numfeatures
-    subplot(numfeatures,1,i)
-    plot(D(:,i+1));
-    ylabel(strarray(i+1));
-end
-title(filename);
-xlabel('Time (sec)');
+% for i=1:numfeatures
+%     subplot(numfeatures,1,i)
+%     plot(D(:,i+1));
+%     ylabel(strarray(i+1));
+% end
+% title(filename);
+% xlabel('Time (sec)');
 end

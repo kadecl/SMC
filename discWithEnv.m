@@ -1,11 +1,9 @@
-function [spmu, d_spmu] = discWithEnv(x)
+function [spmu, d_spmu] = discWithEnv(x ,fr)
 
-x = downsample(x,8);
-[env, ~] = envelope(x, 500, 'rms');
+[env, ~] = envelope(x, fr/2, 'rms');
 
-fs = 1000;
 M = length( env );
-N = 1*fs; %1000Hzのうち1フレームにNのサンプルを入れる
+N = 1*fr; %1000Hzのうち1フレームにNのサンプルを入れる
 T = floor(M/N);
 frames = zeros(T,1);
 
@@ -16,17 +14,15 @@ for i=1:T
 end
 
 figure
-subplot(3,1,1)
+subplot(2,1,1)
 plot( frames )
 threshold = input('enter threshold: ');
 
 spmu = threshold-frames >= 0;
 spmu(1) = 0; %0始まり、0おわりに統一
 spmu(end) = 0;
+d_spmu = conv(spmu, [1,-1], 'same');
 
-subplot(3,1,2)
+subplot(2,1,2)
 plot( spmu )
 
-subplot(3,1,3)
-d_spmu = conv(spmu, [1,-1], 'same');
-plot( d_spmu);

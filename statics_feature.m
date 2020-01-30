@@ -22,20 +22,55 @@ filelist = dir( strcat(speechdir, sufix) );
 w = waitbar(0,'loading...');
 for filenum = 1:length(filelist)
     filename = strcat(speechdir,filelist(filenum).name); 
-    tempD = calcFeatures(filename, 1, numfeatures);
+    tempD = calcFeatures(filename, 1);
     D1 = [D1; tempD];
     waitbar(filenum/length(filelist),w,'Loading speech data');
 end
 close(w);
-%D(:,2) = D(:,2) / max(D(:,2));
-%D(:,3) = D(:,3) / max(D(:,3)); 
-%D(:,2:numfeatures) = D(:,2:numfeatures) ./ max(D(:,2:numfeatures));
-%save([directory,'/D_sec.mat'],'D');
-%T = array2table(D,'VariableNames',{'spmu','psr','lme'});
-%rng(1); % For reproducibility
-%SVM = fitcsvm(T,'spmu');
-% save([directory,'/libSVM.mat'],'SVM');
-%CVsvm = crossval(SVM,'Holdout',0.15)
 
-%libSVM = svmtrain(D(:,1), [(1:150)', D(2:3,:)], '-t 2');
-%save([directory,'/libSVM.mat'],'libSVM');
+D0(:,2:end) = D0(:,2:end) ./ max(D0(:,2:end));
+D1(:,2:end) = D1(:,2:end) ./ max(D1(:,2:end));
+stry = ["Y", "PSR of HE of LPR (mean)", "Log Mel Energy (variance)",...
+      "Spectral Rolloff Point (variance)", "Spectral Centroid (variance)",...
+      "spectral flux", "zcr"];
+figure
+for i = 1:6
+subplot(6,1,i)
+h0 = histogram(D0(:,i+1));
+h0.Normalization = 'probability';
+h0.BinWidth = 0.02;
+hold on
+h1 = histogram(D1(:,i+1));
+h1.Normalization = 'probability';
+h1.BinWidth = 0.02;
+title(stry(i+1))
+end
+
+% figure
+% i=1; subplot(3,1,i)
+% h0 = histogram(D0(:,i+1));
+% h0.Normalization = 'probability';
+% h0.BinWidth = 0.02;
+% hold on
+% h1 = histogram(D1(:,i+1));
+% h1.Normalization = 'probability';
+% h1.BinWidth = 0.02;
+% title(stry(i+1)); legend('music','speech')
+% i=2; subplot(3,1,i)
+% h0 = histogram(D0(:,i+1));
+% h0.Normalization = 'probability';
+% h0.BinWidth = 0.02;
+% hold on
+% h1 = histogram(D1(:,i+1));
+% h1.Normalization = 'probability';
+% h1.BinWidth = 0.02;
+% title(stry(i+1));
+% i=3; subplot(3,1,i)
+% h0 = histogram(D0(:,i+2));
+% h0.Normalization = 'probability';
+% h0.BinWidth = 0.02;
+% hold on
+% h1 = histogram(D1(:,i+2));
+% h1.Normalization = 'probability';
+% h1.BinWidth = 0.02;
+% title(stry(i+1));

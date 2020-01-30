@@ -2,18 +2,19 @@ config;
 
 zcr = ZCR(sample,fr);
 centroid = spectralCentroid(sample,fr);
-centroid = smooth(centroid, fr/100);
+centroid = movvar(centroid, 100);
 flux = spectralFlux(sample,fr);
+flux = movvar(flux, 100);
 rolloff = spectralRolloffPoint(sample,fr);
-rolloff = smooth(rolloff, fr*1.3/100);
+rolloff = movvar(rolloff, 100);
 entropy = spectralEntropy(sample, fr);
-entropy = smooth(entropy, fr*0.5/100);
+entropy = movvar(entropy, 100);
 
 figure
 subplot(6,1,1)
 plot((0:length(sample)-1)/fr, sample);
 subplot(6,1,2)
-plot((0:length(zcr)-1)/1000, zcr);
+plot(zcr);
 ylabel('ZCR (%)')
 subplot(6,1,3)
 t = linspace(0,length(sample)/fr,length(centroid));
